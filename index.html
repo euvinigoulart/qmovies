@@ -146,14 +146,19 @@
     </div>
 
     <script>
-        // Dados de exemplo (pode ser substituído por dados reais de um banco de dados)
-        let vendas = [
-            { data: "2023-10-01", valor: 150.00, local: "WhatsApp" },
-            { data: "2023-10-02", valor: 200.00, local: "Presencial" },
-            { data: "2023-10-03", valor: 99.90, local: "WhatsApp" },
-            { data: "2023-10-04", valor: 120.00, local: "Presencial" },
-            { data: "2023-10-05", valor: 300.00, local: "WhatsApp" }
-        ];
+        // Função para salvar dados no LocalStorage
+        function salvarDados() {
+            localStorage.setItem("vendas", JSON.stringify(vendas));
+        }
+
+        // Função para carregar dados do LocalStorage
+        function carregarDados() {
+            const dadosSalvos = localStorage.getItem("vendas");
+            return dadosSalvos ? JSON.parse(dadosSalvos) : [];
+        }
+
+        // Dados iniciais (carregados do LocalStorage)
+        let vendas = carregarDados();
 
         let vendaEditando = null; // Armazena a venda que está sendo editada
 
@@ -238,6 +243,7 @@
                 vendas.push({ data, valor, local });
             }
 
+            salvarDados(); // Salva os dados no LocalStorage
             fecharModal();
             atualizarDashboard();
             renderizarTabela();
@@ -251,6 +257,7 @@
         // Função para excluir venda
         function excluirVenda(index) {
             vendas.splice(index, 1);
+            salvarDados(); // Salva os dados no LocalStorage
             atualizarDashboard();
             renderizarTabela();
         }
