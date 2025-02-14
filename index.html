@@ -19,10 +19,21 @@
             line-height: 1.6;
         }
 
+        /* Logotipo */
+        .logo {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .logo img {
+            max-width: 150px; /* Tamanho do logotipo */
+            height: auto;
+        }
+
         h1 {
             text-align: center;
-            font-size: 2.5em;
-            margin: 20px 0;
+            font-size: 2em;
+            margin: 10px 0;
             color: #fff; /* Título branco */
         }
 
@@ -38,8 +49,8 @@
             padding: 20px;
             border-radius: 10px;
             text-align: center;
-            width: 30%;
-            margin: 10px;
+            width: 100%; /* Cards ocupam 100% da largura em telas pequenas */
+            margin: 10px 0;
             transition: transform 0.3s, box-shadow 0.3s;
         }
 
@@ -120,7 +131,8 @@
             padding: 20px;
             border-radius: 10px;
             z-index: 1000;
-            width: 300px;
+            width: 90%; /* Modal ocupa 90% da largura em telas pequenas */
+            max-width: 300px; /* Largura máxima */
             color: #fff; /* Texto branco */
         }
 
@@ -146,17 +158,37 @@
         }
 
         .grafico-container {
-            width: 80%;
+            width: 90%; /* Gráfico ocupa 90% da largura em telas pequenas */
             margin: 20px auto;
             background-color: #1a1a1a; /* Preto mais claro */
             padding: 20px;
             border-radius: 10px;
+        }
+
+        /* Responsividade */
+        @media (min-width: 768px) {
+            .card {
+                width: 30%; /* Cards ocupam 30% da largura em telas maiores */
+            }
+
+            .modal {
+                width: 300px; /* Modal fixo em telas maiores */
+            }
+
+            .grafico-container {
+                width: 80%; /* Gráfico ocupa 80% da largura em telas maiores */
+            }
         }
     </style>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <!-- Logotipo -->
+    <div class="logo">
+        <img src="https://via.placeholder.com/150" alt="Logotipo"> <!-- Substitua pelo seu logotipo -->
+    </div>
+
     <h1>Relatório de Vendas</h1>
 
     <!-- Dashboard -->
@@ -367,6 +399,9 @@
         // Inicialização
         atualizarDashboard();
         renderizarTabela();
+    </script>
+</body>
+</html>
     </script>
 </body>
 </html>
