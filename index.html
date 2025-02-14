@@ -26,7 +26,7 @@
         }
 
         .logo img {
-            max-width: 300px; /* Tamanho do logotipo */
+            max-width: 150px; /* Tamanho do logotipo */
             height: auto;
         }
 
@@ -35,6 +35,34 @@
             font-size: 2em;
             margin: 10px 0;
             color: #fff; /* Título branco */
+        }
+
+        .filtro-data {
+            text-align: center;
+            margin: 20px;
+        }
+
+        .filtro-data input {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #d4af37; /* Bordas douradas */
+            background-color: #000;
+            color: #fff; /* Texto branco */
+            margin: 0 5px;
+        }
+
+        .filtro-data button {
+            background-color: #d4af37; /* Dourado */
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .filtro-data button:hover {
+            background-color: #b8860b; /* Dourado mais escuro ao passar o mouse */
         }
 
         .dashboard {
@@ -186,10 +214,18 @@
 <body>
     <!-- Logotipo -->
     <div class="logo">
-        <img src="logo qmóveis.png" alt="Logotipo"> <!-- Substitua pelo seu logotipo -->
+        <img src="logo qmóveis" alt="Logotipo"> <!-- Substitua pelo seu logotipo -->
     </div>
 
     <h1>Relatório de Vendas</h1>
+
+    <!-- Filtro por data -->
+    <div class="filtro-data">
+        <input type="date" id="dataInicial">
+        <input type="date" id="dataFinal">
+        <button onclick="filtrarPorData()">Filtrar</button>
+        <button onclick="limparFiltro()">Limpar Filtro</button>
+    </div>
 
     <!-- Dashboard -->
     <div class="dashboard">
@@ -273,19 +309,28 @@
             return vendas.filter(venda => venda.local === local).length;
         }
 
+        // Função para filtrar vendas por data
+        function filtrarVendasPorData(dataInicial, dataFinal) {
+            return vendas.filter(venda => {
+                const dataVenda = new Date(venda.data);
+                return (!dataInicial || dataVenda >= new Date(dataInicial)) &&
+                       (!dataFinal || dataVenda <= new Date(dataFinal));
+            });
+        }
+
         // Função para atualizar o dashboard
-        function atualizarDashboard() {
-            document.getElementById("totalVendas").textContent = `R$ ${calcularTotalVendas(vendas).toFixed(2)}`;
-            document.getElementById("vendasWhatsApp").textContent = contarVendasPorLocal(vendas, "WhatsApp");
-            document.getElementById("vendasPresencial").textContent = contarVendasPorLocal(vendas, "Presencial");
-            atualizarGrafico(); // Atualiza o gráfico
+        function atualizarDashboard(vendasFiltradas = vendas) {
+            document.getElementById("totalVendas").textContent = `R$ ${calcularTotalVendas(vendasFiltradas).toFixed(2)}`;
+            document.getElementById("vendasWhatsApp").textContent = contarVendasPorLocal(vendasFiltradas, "WhatsApp");
+            document.getElementById("vendasPresencial").textContent = contarVendasPorLocal(vendasFiltradas, "Presencial");
+            atualizarGrafico(vendasFiltradas); // Atualiza o gráfico
         }
 
         // Função para renderizar a tabela de vendas
-        function renderizarTabela() {
+        function renderizarTabela(vendasFiltradas = vendas) {
             const tabelaVendas = document.getElementById("tabelaVendas");
             tabelaVendas.innerHTML = ""; // Limpa a tabela antes de renderizar
-            vendas.forEach((venda, index) => {
+            vendasFiltradas.forEach((venda, index) => {
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${venda.data}</td>
@@ -298,6 +343,23 @@
                 `;
                 tabelaVendas.appendChild(row);
             });
+        }
+
+        // Função para filtrar por data
+        function filtrarPorData() {
+            const dataInicial = document.getElementById("dataInicial").value;
+            const dataFinal = document.getElementById("dataFinal").value;
+            const vendasFiltradas = filtrarVendasPorData(dataInicial, dataFinal);
+            atualizarDashboard(vendasFiltradas);
+            renderizarTabela(vendasFiltradas);
+        }
+
+        // Função para limpar o filtro
+        function limparFiltro() {
+            document.getElementById("dataInicial").value = "";
+            document.getElementById("dataFinal").value = "";
+            atualizarDashboard(vendas);
+            renderizarTabela(vendas);
         }
 
         // Função para abrir o modal (adicionar/editar)
@@ -365,10 +427,10 @@
         }
 
         // Função para atualizar o gráfico
-        function atualizarGrafico() {
+        function atualizarGrafico(vendasFiltradas = vendas) {
             const ctx = document.getElementById("graficoVendas").getContext("2d");
-            const vendasWhatsApp = contarVendasPorLocal(vendas, "WhatsApp");
-            const vendasPresencial = contarVendasPorLocal(vendas, "Presencial");
+            const vendasWhatsApp = contarVendasPorLocal(vendasFiltradas, "WhatsApp");
+            const vendasPresencial = contarVendasPorLocal(vendasFiltradas, "Presencial");
 
             if (window.grafico) {
                 window.grafico.destroy(); // Destrói o gráfico anterior
@@ -402,3 +464,5 @@
     </script>
 </body>
 </html>
+
+
