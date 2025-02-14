@@ -164,7 +164,7 @@
             color: #fff; /* Texto branco */
         }
 
-        .modal input, .modal select {
+        .modal input, .modal select, .modal textarea {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -253,6 +253,7 @@
         <thead>
             <tr>
                 <th>Data da Venda</th>
+                <th>Descrição do Produto</th>
                 <th>Valor do Produto</th>
                 <th>Local da Venda</th>
                 <th>Ações</th>
@@ -273,6 +274,7 @@
     <div class="modal" id="modal">
         <h2 id="modalTitulo">Adicionar Venda</h2>
         <input type="date" id="dataVenda" placeholder="Data da Venda">
+        <textarea id="descricaoProduto" placeholder="Descrição do Produto"></textarea>
         <input type="number" id="valorVenda" placeholder="Valor do Produto">
         <select id="localVenda">
             <option value="WhatsApp">WhatsApp</option>
@@ -334,6 +336,7 @@
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${venda.data}</td>
+                    <td>${venda.descricao}</td>
                     <td>R$ ${venda.valor.toFixed(2)}</td>
                     <td>${venda.local}</td>
                     <td>
@@ -371,6 +374,7 @@
                 vendaEditando = index;
                 document.getElementById("modalTitulo").textContent = "Editar Venda";
                 document.getElementById("dataVenda").value = vendas[index].data;
+                document.getElementById("descricaoProduto").value = vendas[index].descricao;
                 document.getElementById("valorVenda").value = vendas[index].valor;
                 document.getElementById("localVenda").value = vendas[index].local;
             } else {
@@ -378,6 +382,7 @@
                 vendaEditando = null;
                 document.getElementById("modalTitulo").textContent = "Adicionar Venda";
                 document.getElementById("dataVenda").value = "";
+                document.getElementById("descricaoProduto").value = "";
                 document.getElementById("valorVenda").value = "";
                 document.getElementById("localVenda").value = "WhatsApp";
             }
@@ -396,15 +401,16 @@
         // Função para salvar venda (adicionar ou editar)
         function salvarVenda() {
             const data = document.getElementById("dataVenda").value;
+            const descricao = document.getElementById("descricaoProduto").value;
             const valor = parseFloat(document.getElementById("valorVenda").value);
             const local = document.getElementById("localVenda").value;
 
             if (vendaEditando !== null) {
                 // Editar venda existente
-                vendas[vendaEditando] = { data, valor, local };
+                vendas[vendaEditando] = { data, descricao, valor, local };
             } else {
                 // Adicionar nova venda
-                vendas.push({ data, valor, local });
+                vendas.push({ data, descricao, valor, local });
             }
 
             salvarDados(); // Salva os dados no LocalStorage
@@ -464,5 +470,3 @@
     </script>
 </body>
 </html>
-
-
