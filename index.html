@@ -5,81 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatório de Vendas</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #000;
-            color: #d4af37; /* Dourado mais suave */
+        /* Reset básico */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #000; /* Fundo preto */
+            color: #fff; /* Texto branco */
+            line-height: 1.6;
+        }
+
         h1 {
             text-align: center;
             font-size: 2.5em;
             margin: 20px 0;
-            text-shadow: 0 0 10px #d4af37, 0 0 20px #d4af37; /* Efeito neon com dourado */
+            color: #fff; /* Título branco */
         }
+
         .dashboard {
             display: flex;
             justify-content: space-around;
             margin: 20px;
+            flex-wrap: wrap;
         }
+
         .card {
-            background-color: #1a1a1a;
+            background-color: #1a1a1a; /* Preto mais claro */
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 10px #d4af37, 0 0 20px #d4af37; /* Sombras douradas */
             text-align: center;
             width: 30%;
+            margin: 10px;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 1.2em;
+        }
+
+        /* Cores personalizadas para os cards */
+        #totalVendasCard {
+            background-color: #1e90ff; /* Azul */
+        }
+
+        #vendasWhatsAppCard {
+            background-color: #32cd32; /* Verde */
+        }
+
+        #vendasPresencialCard {
+            background-color: #ffffff; /* Branco */
+            color: #000; /* Texto preto para contraste */
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px;
+            background-color: #1a1a1a; /* Preto mais claro */
+            border-radius: 10px;
+            overflow: hidden;
         }
+
         th, td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #d4af37; /* Linhas douradas */
+            border-bottom: 1px solid #333; /* Linhas mais escuras */
         }
+
         th {
-            background-color: #1a1a1a;
+            background-color: #222; /* Fundo escuro para o cabeçalho */
+            color: #fff;
+            font-weight: bold;
         }
+
         tr:hover {
-            background-color: #333;
+            background-color: #333; /* Efeito hover nas linhas */
         }
+
         .btn {
-            background-color: #d4af37; /* Botões dourados */
+            background-color: #d4af37; /* Dourado */
             color: #000;
             border: none;
             padding: 8px 16px;
             border-radius: 5px;
             cursor: pointer;
             margin: 5px;
+            transition: background-color 0.3s;
         }
+
         .btn:hover {
-            background-color: #b8860b; /* Tom mais escuro ao passar o mouse */
+            background-color: #b8860b; /* Dourado mais escuro ao passar o mouse */
         }
+
         .modal {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: #1a1a1a;
+            background-color: #1a1a1a; /* Preto mais claro */
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 10px #d4af37, 0 0 20px #d4af37; /* Sombras douradas */
             z-index: 1000;
+            width: 300px;
+            color: #fff; /* Texto branco */
         }
-        .modal input {
+
+        .modal input, .modal select {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
             border-radius: 5px;
             border: 1px solid #d4af37; /* Bordas douradas */
             background-color: #000;
-            color: #d4af37;
+            color: #fff; /* Texto branco */
         }
+
         .overlay {
             display: none;
             position: fixed;
@@ -87,25 +141,35 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(0, 0, 0, 0.7); /* Overlay escuro */
             z-index: 999;
         }
+
+        .grafico-container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #1a1a1a; /* Preto mais claro */
+            padding: 20px;
+            border-radius: 10px;
+        }
     </style>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Relatório de Vendas</h1> <!-- Título simplificado -->
+    <h1>Relatório de Vendas</h1>
 
     <!-- Dashboard -->
     <div class="dashboard">
-        <div class="card">
+        <div class="card" id="totalVendasCard">
             <h2>Total de Vendas</h2>
             <p id="totalVendas">R$ 0,00</p>
         </div>
-        <div class="card">
+        <div class="card" id="vendasWhatsAppCard">
             <h2>Vendas WhatsApp</h2>
             <p id="vendasWhatsApp">0</p>
         </div>
-        <div class="card">
+        <div class="card" id="vendasPresencialCard">
             <h2>Vendas Presenciais</h2>
             <p id="vendasPresencial">0</p>
         </div>
@@ -130,6 +194,11 @@
             <!-- Dados serão inseridos aqui via JavaScript -->
         </tbody>
     </table>
+
+    <!-- Gráfico de Vendas -->
+    <div class="grafico-container">
+        <canvas id="graficoVendas"></canvas>
+    </div>
 
     <!-- Modal para adicionar/editar venda -->
     <div class="overlay" id="overlay"></div>
@@ -177,6 +246,7 @@
             document.getElementById("totalVendas").textContent = `R$ ${calcularTotalVendas(vendas).toFixed(2)}`;
             document.getElementById("vendasWhatsApp").textContent = contarVendasPorLocal(vendas, "WhatsApp");
             document.getElementById("vendasPresencial").textContent = contarVendasPorLocal(vendas, "Presencial");
+            atualizarGrafico(); // Atualiza o gráfico
         }
 
         // Função para renderizar a tabela de vendas
@@ -260,6 +330,38 @@
             salvarDados(); // Salva os dados no LocalStorage
             atualizarDashboard();
             renderizarTabela();
+        }
+
+        // Função para atualizar o gráfico
+        function atualizarGrafico() {
+            const ctx = document.getElementById("graficoVendas").getContext("2d");
+            const vendasWhatsApp = contarVendasPorLocal(vendas, "WhatsApp");
+            const vendasPresencial = contarVendasPorLocal(vendas, "Presencial");
+
+            if (window.grafico) {
+                window.grafico.destroy(); // Destrói o gráfico anterior
+            }
+
+            window.grafico = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: ["WhatsApp", "Presencial"],
+                    datasets: [{
+                        label: "Vendas por Local",
+                        data: [vendasWhatsApp, vendasPresencial],
+                        backgroundColor: ["#32cd32", "#ffffff"], // Cores do gráfico
+                        borderColor: ["#32cd32", "#ffffff"],
+                        borderWidth: 1,
+                    }],
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                        },
+                    },
+                },
+            });
         }
 
         // Inicialização
