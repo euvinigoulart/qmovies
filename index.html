@@ -309,6 +309,7 @@
 
         // Função para abrir o modal
         function abrirModal() {
+            console.log("Abrindo modal...");
             const modal = document.getElementById("modal");
             const overlay = document.getElementById("overlay");
             modal.style.display = "block";
@@ -317,6 +318,7 @@
 
         // Função para fechar o modal
         function fecharModal() {
+            console.log("Fechando modal...");
             const modal = document.getElementById("modal");
             const overlay = document.getElementById("overlay");
             modal.style.display = "none";
@@ -336,6 +338,7 @@
             console.log("Dados coletados:", { data, descricao, valor, local });
 
             if (!data || !descricao || isNaN(valor)) {
+                console.warn("Campos obrigatórios não preenchidos corretamente.");
                 alert("Preencha todos os campos corretamente.");
                 return;
             }
@@ -371,11 +374,13 @@
 
         // Função para carregar vendas do Firestore
         function carregarVendas() {
+            console.log("Carregando vendas...");
             const tabelaVendas = document.getElementById("tabelaVendas");
             tabelaVendas.innerHTML = "";
 
             db.collection("vendas").get()
                 .then((querySnapshot) => {
+                    console.info("Vendas carregadas com sucesso!");
                     querySnapshot.forEach((doc) => {
                         const venda = doc.data();
                         const row = document.createElement("tr");
@@ -400,6 +405,7 @@
 
         // Função para editar venda
         function editarVenda(id) {
+            console.log(`Editando venda com ID: ${id}`);
             vendaEditando = id;
             db.collection("vendas").doc(id).get()
                 .then((doc) => {
@@ -419,6 +425,7 @@
 
         // Função para excluir venda
         function excluirVenda(id) {
+            console.log(`Excluindo venda com ID: ${id}`);
             if (confirm("Tem certeza que deseja excluir esta venda?")) {
                 db.collection("vendas").doc(id).delete()
                     .then(() => {
@@ -433,6 +440,7 @@
 
         // Carregar vendas ao abrir a página
         document.addEventListener("DOMContentLoaded", () => {
+            console.log("Página carregada. Iniciando carregamento das vendas...");
             carregarVendas();
         });
     </script>
