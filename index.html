@@ -290,4 +290,151 @@
     <script>
         // Configuração do Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyD5K4QiKxx
+            apiKey: "AIzaSyD5K4QiKxx8A1qnFHIs5haQbWLsDL6g1R8",
+            authDomain: "relatorio-qmoveis.firebaseapp.com",
+            projectId: "relatorio-qmoveis",
+            storageBucket: "relatorio-qmoveis.firebasestorage.app",
+            messagingSenderId: "734129901862",
+            appId: "1:734129901862:web:2cfb41dda91cf86ea2b1e7"
+        };
+
+        // Inicialize o Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        console.log("Firebase inicializado com sucesso:", app);
+
+        // Variável global para armazenar o ID da venda sendo editada
+        let vendaEditando = null;
+
+        // Função para salvar venda no Firestore
+        function salvarVendaModal() {
+            console.log("Função salvarVendaModal foi chamada!");
+
+            const data = document.getElementById("dataVenda").value;
+            const descricao = document.getElementById("descricaoProduto").value;
+            const valor = parseFloat(document.getElementById("valorVenda").value);
+            const local = document.getElementById("localVenda").value;
+
+            console.log("Dados coletados:", { data, descricao, valor, local });
+
+            if (!data || !descricao || isNaN(valor)) {
+                alert("Preencha todos os campos corretamente.");
+                return;
+            }
+
+            const venda = { data, descricao, valor, local };
+
+            if (vendaEditando !== null) {
+                // Editar venda existente
+                db.collection("vendas").doc(vendaEditando).update(venda)
+                    .then(() => {
+                        console.log("Venda atualizada com sucesso!");
+                        fecharModal();
+                        carregarVendas();
+                    })
+                    .catch((error) => {
+                        console.error("Erro ao atualizar venda:", error);
+                        alert("Erro ao atualizar venda. Verifique o console para mais detalhes.");
+                    });
+            } else {
+                // Adicionar nova venda
+                db.collection("vendas").add(venda)
+                    .then(() => {
+                        console.log("Venda salva com sucesso!");
+                        fecharModal();
+                        carregarVendas();
+                    })
+                    .catch((error) => {
+                        console.error("Erro ao salvar venda:", error);
+                        alert("Erro ao salvar venda. Verifique o console para mais detalhes.");
+                    });
+            }
+        }
+
+        // Função para carregar vendas do Firestore
+        function carregarVendas() {
+            const tabelaVendas = document.getElementById("tabelaVendas");
+            tabelaVendas.innerHTML = "";
+
+            db.collection("vendas").get()
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        const venda = doc.data();
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${venda.data}</td>
+                            <td>${venda.descricao}</td>
+                            <td>R$ ${venda.valor.toFixed(2)}</td>
+                            <td>${venda.local}</td>
+                            <td>
+                                <button class="btn" onclick="editarVenda('${doc.id}')">Editar</button>
+                                <button class="btn" onclick="excluirVenda('${doc.id}')">Excluir</button>
+                            </td>
+                        `;
+                        tabelaVendas.appendChild(row);
+                    });
+                })
+                .catch((error) => {
+                    console.error("Erro ao carregar vendas:", error);
+                    alert("Erro ao carregar vendas. Verifique o console para mais detalhes.");
+                });
+        }
+
+        // Função para editar venda
+        function editarVenda(id) {
+            vendaEditando = id;
+            db.collection("vendas").doc(id).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        const venda = doc.data();
+                        document.getElementById("dataVenda").value = venda.data;
+                        document.getElementById("descricaoProduto").value = venda.descricao;
+                        document.getElementById("valorVenda").value = venda.valor;
+                        document.getElementById("localVenda").value = venda.local;
+                        abrirModal();
+                    }
+                })
+                .catch((error) => {
+                    console.error("Erro ao carregar venda:", error);
+                });
+        }
+
+        // Função para excluir venda
+        function excluirVenda(id) {
+            if (confirm("Tem certeza que deseja excluir esta venda?")) {
+                db.collection("vendas").doc(id).delete()
+                    .then(() => {
+                        console.log("Venda excluída com sucesso!");
+                        carregarVendas();
+                    })
+                    .catch((error) => {
+                        console.error("Erro ao excluir venda:", error);
+                    });
+            }
+        }
+
+        // Função para abrir o modal
+        function abrirModal() {
+            const modal = document.getElementById("modal");
+            const overlay = document.getElementById("overlay");
+            modal.style.display = "block";
+            overlay.style.display = "block";
+        }
+
+        // Função para fechar o modal
+        function fecharModal() {
+            const modal = document.getElementById("modal");
+            const overlay = document.getElementById("overlay");
+            modal.style.display = "none";
+            overlay.style.display = "none";
+            vendaEditando = null; // Limpa o ID da venda sendo editada
+        }
+
+        // Carregar vendas ao abrir a página
+        document.addEventListener("DOMContentLoaded", () => {
+            carregarVendas();
+        });
+    </script>
+</body>
+</html>
