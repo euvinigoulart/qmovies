@@ -208,7 +208,7 @@
             }
         }
     </style>
-    <!-- Firebase (versão compat) -->
+<!-- Firebase (versão compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore-compat.js"></script>
     <!-- Chart.js -->
@@ -306,6 +306,23 @@
 
         // Variável global para armazenar o ID da venda sendo editada
         let vendaEditando = null;
+
+        // Função para abrir o modal
+        function abrirModal() {
+            const modal = document.getElementById("modal");
+            const overlay = document.getElementById("overlay");
+            modal.style.display = "block";
+            overlay.style.display = "block";
+        }
+
+        // Função para fechar o modal
+        function fecharModal() {
+            const modal = document.getElementById("modal");
+            const overlay = document.getElementById("overlay");
+            modal.style.display = "none";
+            overlay.style.display = "none";
+            vendaEditando = null; // Limpa o ID da venda sendo editada
+        }
 
         // Função para salvar venda no Firestore
         function salvarVendaModal() {
@@ -412,23 +429,6 @@
                         console.error("Erro ao excluir venda:", error);
                     });
             }
-        }
-
-        // Função para abrir o modal
-        function abrirModal() {
-            const modal = document.getElementById("modal");
-            const overlay = document.getElementById("overlay");
-            modal.style.display = "block";
-            overlay.style.display = "block";
-        }
-
-        // Função para fechar o modal
-        function fecharModal() {
-            const modal = document.getElementById("modal");
-            const overlay = document.getElementById("overlay");
-            modal.style.display = "none";
-            overlay.style.display = "none";
-            vendaEditando = null; // Limpa o ID da venda sendo editada
         }
 
         // Carregar vendas ao abrir a página
