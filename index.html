@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório de Vendas</title>
+    <title>CPA - Vendas Qmóvies</title>
     <style>
         /* Reset básico */
         * {
@@ -216,7 +216,7 @@
 <body>
     <!-- Logotipo -->
     <div class="logo">
-        <img src="https://via.placeholder.com/150" alt="Logotipo"> <!-- Substitua pelo seu logotipo -->
+        <img src="logo qmóveis.png" alt="Logotipo"> <!-- Substitua pelo seu logotipo -->
     </div>
 
     <h1>Relatório de Vendas</h1>
@@ -288,17 +288,20 @@
 
     <script>
         // Configuração do Firebase (substitua com suas credenciais)
-       const firebaseConfig = {
-  apiKey: "AIzaSyD5K4QiKxx8A1qnFHIs5haQbWLsDL6g1R8",
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5K4QiKxx8A1qnFHIs5haQbWLsDL6g1R8",
   authDomain: "relatorio-qmoveis.firebaseapp.com",
   projectId: "relatorio-qmoveis",
   storageBucket: "relatorio-qmoveis.firebasestorage.app",
   messagingSenderId: "734129901862",
   appId: "1:734129901862:web:2cfb41dda91cf86ea2b1e7"
-};
+        };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+        // Inicialize o Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        console.log("Firebase inicializado com sucesso:", app);
 
         let vendaEditando = null; // Armazena o ID da venda que está sendo editada
 
