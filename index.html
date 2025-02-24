@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CPA - Vendas Qmóveis</title>
+    <title>Relatório de Vendas</title>
     <style>
         /* Reset básico */
         * {
@@ -216,7 +216,7 @@
 <body>
     <!-- Logotipo -->
     <div class="logo">
-        <img src="logo qmóveis.png" alt="Logotipo"> <!-- Substitua pelo seu logotipo -->
+        <img src="https://via.placeholder.com/150" alt="Logotipo"> <!-- Substitua pelo seu logotipo -->
     </div>
 
     <h1>Relatório de Vendas</h1>
@@ -289,12 +289,12 @@
     <script>
         // Configuração do Firebase (substitua com suas credenciais)
         const firebaseConfig = {
-           apiKey: "AIzaSyD5K4QiKxx8A1qnFHIs5haQbWLsDL6g1R8",
-  authDomain: "relatorio-qmoveis.firebaseapp.com",
-  projectId: "relatorio-qmoveis",
-  storageBucket: "relatorio-qmoveis.firebasestorage.app",
-  messagingSenderId: "734129901862",
-  appId: "1:734129901862:web:2cfb41dda91cf86ea2b1e7"
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_AUTH_DOMAIN",
+            projectId: "SEU_PROJECT_ID",
+            storageBucket: "SEU_STORAGE_BUCKET",
+            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+            appId: "SEU_APP_ID"
         };
 
         // Inicialize o Firebase
@@ -309,6 +309,13 @@
             const descricao = document.getElementById("descricaoProduto").value;
             const valor = parseFloat(document.getElementById("valorVenda").value);
             const local = document.getElementById("localVenda").value;
+
+            console.log("Dados da venda:", { data, descricao, valor, local }); // Verifique se os dados estão corretos
+
+            if (isNaN(valor)) {
+                alert("O valor deve ser um número válido.");
+                return;
+            }
 
             const venda = { data, descricao, valor, local };
 
@@ -419,9 +426,6 @@
         document.addEventListener("DOMContentLoaded", () => {
             carregarVendas();
         });
-    </script>
-</body>
-</html>
     </script>
 </body>
 </html>
