@@ -219,76 +219,25 @@
         <img src="logo qmóveis.png" alt="Logotipo"> <!-- Substitua pelo seu logotipo -->
     </div>
 
-    <h1>Relatório de Vendas</h1>
-
-    <!-- Filtro por data -->
-    <div class="filtro-data">
-        <input type="date" id="dataInicial">
-        <input type="date" id="dataFinal">
-        <button onclick="filtrarPorData()">Filtrar</button>
-        <button onclick="limparFiltro()">Limpar Filtro</button>
-    </div>
-
-    <!-- Dashboard -->
-    <div class="dashboard">
-        <div class="card" id="totalVendasCard">
-            <h2>Total de Vendas</h2>
-            <p id="totalVendas">R$ 0,00</p>
-        </div>
-        <div class="card" id="vendasWhatsAppCard">
-            <h2>Vendas WhatsApp</h2>
-            <p id="vendasWhatsApp">0</p>
-        </div>
-        <div class="card" id="vendasPresencialCard">
-            <h2>Vendas Presenciais</h2>
-            <p id="vendasPresencial">0</p>
-        </div>
-    </div>
-
-    <!-- Botão para adicionar nova venda -->
-    <div style="text-align: center; margin: 20px;">
-        <button class="btn" onclick="abrirModal()">Adicionar Venda</button>
-    </div>
-
-    <!-- Tabela de Vendas -->
-    <table>
-        <thead>
-            <tr>
-                <th>Data da Venda</th>
-                <th>Descrição do Produto</th>
-                <th>Valor do Produto</th>
-                <th>Local da Venda</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody id="tabelaVendas">
-            <!-- Dados serão inseridos aqui via JavaScript -->
-        </tbody>
-    </table>
-
-    <!-- Gráfico de Vendas -->
-    <div class="grafico-container">
-        <canvas id="graficoVendas"></canvas>
-    </div>
-
-    <!-- Modal para adicionar/editar venda -->
-    <div class="overlay" id="overlay"></div>
-    <div class="modal" id="modal">
-        <h2 id="modalTitulo">Adicionar Venda</h2>
-        <input type="date" id="dataVenda" placeholder="Data da Venda">
-        <textarea id="descricaoProduto" placeholder="Descrição do Produto"></textarea>
-        <input type="number" id="valorVenda" placeholder="Valor do Produto">
-        <select id="localVenda">
-            <option value="WhatsApp">WhatsApp</option>
-            <option value="Presencial">Presencial</option>
-        </select>
-        <button class="btn" onclick="salvarVendaModal()">Salvar</button>
-        <button class="btn" onclick="fecharModal()">Cancelar</button>
-    </div>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Vendas</title>
+    <style>
+        /* Seu CSS aqui */
+    </style>
+    <!-- Firebase e Chart.js -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Seu HTML aqui -->
 
     <script>
         // Configuração do Firebase (substitua com suas credenciais)
-    const firebaseConfig = {
+   const firebaseConfig = {
   apiKey: "AIzaSyD5K4QiKxx8A1qnFHIs5haQbWLsDL6g1R8",
   authDomain: "relatorio-qmoveis.firebaseapp.com",
   projectId: "relatorio-qmoveis",
