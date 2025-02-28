@@ -289,7 +289,7 @@
 
     <script>
         // Configuração do Firebase
-        const firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyD5K4QiKxx8A1qnFHIs5haQbWLsDL6g1R8",
     authDomain: "relatorio-qmoveis.firebaseapp.com",
     projectId: "relatorio-qmoveis",
@@ -298,151 +298,127 @@
     appId: "1:734129901862:web:2cfb41dda91cf86ea2b1e7"
 };
 
-        // Inicialize o Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-        console.log("Firebase inicializado com sucesso:", app);
+// Função para adicionar uma venda
+function salvarVendaModal() {
+    const data = new Date(document.getElementById('dataVenda').value);
+    const descricao = document.getElementById('descricaoProduto').value;
+    const valor = parseFloat(document.getElementById('valorVenda').value);
+    const local = document.getElementById('localVenda').value;
 
-        // Variável global para armazenar o ID da venda sendo editada
-        let vendaEditando = null;
-
-        // Função para abrir o modal
-        function abrirModal() {
-            console.log("Abrindo modal...");
-            const modal = document.getElementById("modal");
-            const overlay = document.getElementById("overlay");
-            modal.style.display = "block";
-            overlay.style.display = "block";
-        }
-
-        // Função para fechar o modal
-        function fecharModal() {
-            console.log("Fechando modal...");
-            const modal = document.getElementById("modal");
-            const overlay = document.getElementById("overlay");
-            modal.style.display = "none";
-            overlay.style.display = "none";
-            vendaEditando = null; // Limpa o ID da venda sendo editada
-        }
-
-        // Função para salvar venda no Firestore
-        function salvarVendaModal() {
-            console.log("Função salvarVendaModal foi chamada!");
-
-            const data = document.getElementById("dataVenda").value;
-            const descricao = document.getElementById("descricaoProduto").value;
-            const valor = parseFloat(document.getElementById("valorVenda").value);
-            const local = document.getElementById("localVenda").value;
-
-            console.log("Dados coletados:", { data, descricao, valor, local });
-
-            if (!data || !descricao || isNaN(valor)) {
-                console.warn("Campos obrigatórios não preenchidos corretamente.");
-                alert("Preencha todos os campos corretamente.");
-                return;
-            }
-
-            const venda = { data, descricao, valor, local };
-
-            if (vendaEditando !== null) {
-                // Editar venda existente
-                db.collection("vendas").doc(vendaEditando).update(venda)
-                    .then(() => {
-                        console.log("Venda atualizada com sucesso!");
-                        fecharModal();
-                        carregarVendas();
-                    })
-                    .catch((error) => {
-                        console.error("Erro ao atualizar venda:", error);
-                        alert("Erro ao atualizar venda. Verifique o console para mais detalhes.");
-                    });
-            } else {
-                // Adicionar nova venda
-                db.collection("vendas").add(venda)
-                    .then(() => {
-                        console.log("Venda salva com sucesso!");
-                        fecharModal();
-                        carregarVendas();
-                    })
-                    .catch((error) => {
-                        console.error("Erro ao salvar venda:", error);
-                        alert("Erro ao salvar venda. Verifique o console para mais detalhes.");
-                    });
-            }
-        }
-
-        // Função para carregar vendas do Firestore
-        function carregarVendas() {
-            console.log("Carregando vendas...");
-            const tabelaVendas = document.getElementById("tabelaVendas");
-            tabelaVendas.innerHTML = "";
-
-            db.collection("vendas").get()
-                .then((querySnapshot) => {
-                    console.info("Vendas carregadas com sucesso!");
-                    querySnapshot.forEach((doc) => {
-                        const venda = doc.data();
-                        const row = document.createElement("tr");
-                        row.innerHTML = `
-                            <td>${venda.data}</td>
-                            <td>${venda.descricao}</td>
-                            <td>R$ ${venda.valor.toFixed(2)}</td>
-                            <td>${venda.local}</td>
-                            <td>
-                                <button class="btn" onclick="editarVenda('${doc.id}')">Editar</button>
-                                <button class="btn" onclick="excluirVenda('${doc.id}')">Excluir</button>
-                            </td>
-                        `;
-                        tabelaVendas.appendChild(row);
-                    });
-                })
-                .catch((error) => {
-                    console.error("Erro ao carregar vendas:", error);
-                    alert("Erro ao carregar vendas. Verifique o console para mais detalhes.");
-                });
-        }
-
-        // Função para editar venda
-        function editarVenda(id) {
-            console.log(`Editando venda com ID: ${id}`);
-            vendaEditando = id;
-            db.collection("vendas").doc(id).get()
-                .then((doc) => {
-                    if (doc.exists) {
-                        const venda = doc.data();
-                        document.getElementById("dataVenda").value = venda.data;
-                        document.getElementById("descricaoProduto").value = venda.descricao;
-                        document.getElementById("valorVenda").value = venda.valor;
-                        document.getElementById("localVenda").value = venda.local;
-                        abrirModal();
-                    }
-                })
-                .catch((error) => {
-                    console.error("Erro ao carregar venda:", error);
-                });
-        }
-
-        // Função para excluir venda
-        function excluirVenda(id) {
-            console.log(`Excluindo venda com ID: ${id}`);
-            if (confirm("Tem certeza que deseja excluir esta venda?")) {
-                db.collection("vendas").doc(id).delete()
-                    .then(() => {
-                        console.log("Venda excluída com sucesso!");
-                        carregarVendas();
-                    })
-                    .catch((error) => {
-                        console.error("Erro ao excluir venda:", error);
-                    });
-            }
-        }
-
-        // Carregar vendas ao abrir a página
-        document.addEventListener("DOMContentLoaded", () => {
-            console.log("Página carregada. Iniciando carregamento das vendas...");
+    if (!isNaN(data.getTime()) && descricao && !isNaN(valor)) {
+        db.collection("vendas").add({
+            data: firebase.firestore.Timestamp.fromDate(data),
+            descricao,
+            valor,
+            local
+        }).then(() => {
+            fecharModal();
             carregarVendas();
+        }).catch(error => console.error("Erro ao salvar venda: ", error));
+    } else {
+        alert("Preencha todos os campos corretamente!");
+    }
+}
+
+// Função para carregar vendas
+function carregarVendas() {
+    db.collection("vendas").orderBy("data", "desc").get().then(snapshot => {
+        const tabela = document.getElementById("tabelaVendas");
+        tabela.innerHTML = "";
+        let total = 0;
+        let whatsapp = 0;
+        let presencial = 0;
+
+        snapshot.forEach(doc => {
+            const venda = doc.data();
+            total += venda.valor;
+            if (venda.local === "WhatsApp") whatsapp++;
+            if (venda.local === "Presencial") presencial++;
+
+            tabela.innerHTML += `<tr>
+                <td>${venda.data.toDate().toLocaleDateString()}</td>
+                <td>${venda.descricao}</td>
+                <td>R$ ${venda.valor.toFixed(2)}</td>
+                <td>${venda.local}</td>
+                <td><button onclick="excluirVenda('${doc.id}')">Excluir</button></td>
+            </tr>`;
         });
+
+        document.getElementById("totalVendas").innerText = `R$ ${total.toFixed(2)}`;
+        document.getElementById("vendasWhatsApp").innerText = whatsapp;
+        document.getElementById("vendasPresencial").innerText = presencial;
+        atualizarGrafico(whatsapp, presencial);
+    });
+}
+
+// Função para excluir uma venda
+function excluirVenda(id) {
+    db.collection("vendas").doc(id).delete().then(() => carregarVendas());
+}
+
+// Configuração do gráfico
+const ctx = document.getElementById('graficoVendas').getContext('2d');
+let graficoVendas = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['WhatsApp', 'Presencial'],
+        datasets: [{ data: [0, 0], backgroundColor: ['#4CAF50', '#2196F3'] }]
+    }
+});
+
+// Atualizar gráfico
+function atualizarGrafico(whatsapp, presencial) {
+    graficoVendas.data.datasets[0].data = [whatsapp, presencial];
+    graficoVendas.update();
+}
+
+// Filtros de data
+function filtrarPorData() {
+    const dataInicial = new Date(document.getElementById("dataInicial").value);
+    const dataFinal = new Date(document.getElementById("dataFinal").value);
+
+    if (isNaN(dataInicial.getTime()) || isNaN(dataFinal.getTime())) {
+        alert("Por favor, selecione datas válidas!");
+        return;
+    }
+
+    db.collection("vendas")
+        .where("data", ">=", firebase.firestore.Timestamp.fromDate(dataInicial))
+        .where("data", "<=", firebase.firestore.Timestamp.fromDate(dataFinal))
+        .get()
+        .then(snapshot => {
+            const tabela = document.getElementById("tabelaVendas");
+            tabela.innerHTML = "";
+
+            snapshot.forEach(doc => {
+                const venda = doc.data();
+                tabela.innerHTML += `<tr>
+                    <td>${venda.data.toDate().toLocaleDateString()}</td>
+                    <td>${venda.descricao}</td>
+                    <td>R$ ${venda.valor.toFixed(2)}</td>
+                    <td>${venda.local}</td>
+                    <td><button onclick="excluirVenda('${doc.id}')">Excluir</button></td>
+                </tr>`;
+            });
+        });
+}
+
+function limparFiltro() {
+    document.getElementById("dataInicial").value = "";
+    document.getElementById("dataFinal").value = "";
+    carregarVendas();
+}
+
+// Modal
+function abrirModal() { document.getElementById("modal").style.display = "block"; }
+function fecharModal() { document.getElementById("modal").style.display = "none"; }
+
+// Inicialização
+carregarVendas();
+
     </script>
 </body>
 </html>
