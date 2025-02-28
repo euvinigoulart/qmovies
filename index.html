@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório de Vendas</title>
+    <title>CPA - Vendas Qmóvies</title>
     <style>
         /* Seu CSS original aqui */
     </style>
-    <!-- Firebase, Chart.js e jsPDF -->
-    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js"></script>
+    <!-- Chart.js e jsPDF -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <!-- Logotipo -->
     <div class="logo">
-        <img src="https://via.placeholder.com/150" alt="Logotipo">
+        <img src="logo qmóveis.png" alt="Logotipo">
     </div>
 
     <h1>Relatório de Vendas</h1>
@@ -27,8 +25,7 @@
         <input type="date" id="dataFinal">
         <button onclick="filtrarPorData()">Filtrar</button>
         <button onclick="limparFiltro()">Limpar Filtro</button>
-        <button onclick="salvarRelatorioLocal()">Salvar Relatório</button>
-        <button onclick="gerarPDF()">Gerar PDF</button>
+        <button onclick="gerarPDF()">Gerar PDF</button> <!-- Novo botão para gerar PDF -->
     </div>
 
     <!-- Dashboard -->
@@ -84,111 +81,188 @@
             <option value="WhatsApp">WhatsApp</option>
             <option value="Presencial">Presencial</option>
         </select>
-        <button class="btn" onclick="salvarVendaModal()">Salvar</button>
+        <button class="btn" onclick="salvarVenda()">Salvar</button>
         <button class="btn" onclick="fecharModal()">Cancelar</button>
     </div>
 
     <script>
-        // Configuração do Firebase (substitua com suas credenciais)
-        const firebaseConfig = {
-  apiKey: "AIzaSyD5K4QiKxx8A1qnFHIs5haQbWLsDL6g1R8",
-  authDomain: "relatorio-qmoveis.firebaseapp.com",
-  projectId: "relatorio-qmoveis",
-  storageBucket: "relatorio-qmoveis.firebasestorage.app",
-  messagingSenderId: "734129901862",
-  appId: "1:734129901862:web:2cfb41dda91cf86ea2b1e7"
-};
-        // Inicialize o Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        // Função para salvar dados no LocalStorage
+        function salvarDados() {
+            localStorage.setItem("vendas", JSON.stringify(vendas));
+        }
 
-        console.log("Firebase inicializado com sucesso:", app);
+        // Função para carregar dados do LocalStorage
+        function carregarDados() {
+            const dadosSalvos = localStorage.getItem("vendas");
+            return dadosSalvos ? JSON.parse(dadosSalvos) : [];
+        }
 
-        let vendaEditando = null; // Armazena o ID da venda que está sendo editada
+        // Dados iniciais (carregados do LocalStorage)
+        let vendas = carregarDados();
 
-        // Função para salvar venda no Firestore
-        function salvarVendaModal() {
+        let vendaEditando = null; // Armazena a venda que está sendo editada
+
+        // Função para calcular o total de vendas
+        function calcularTotalVendas(vendas) {
+            return vendas.reduce((total, venda) => total + venda.valor, 0);
+        }
+
+        // Função para contar vendas por local
+        function contarVendasPorLocal(vendas, local) {
+            return vendas.filter(venda => venda.local === local).length;
+        }
+
+        // Função para filtrar vendas por data
+        function filtrarVendasPorData(dataInicial, dataFinal) {
+            return vendas.filter(venda => {
+                const dataVenda = new Date(venda.data);
+                return (!dataInicial || dataVenda >= new Date(dataInicial)) &&
+                       (!dataFinal || dataVenda <= new Date(dataFinal));
+            });
+        }
+
+        // Função para atualizar o dashboard
+        function atualizarDashboard(vendasFiltradas = vendas) {
+            document.getElementById("totalVendas").textContent = `R$ ${calcularTotalVendas(vendasFiltradas).toFixed(2)}`;
+            document.getElementById("vendasWhatsApp").textContent = contarVendasPorLocal(vendasFiltradas, "WhatsApp");
+            document.getElementById("vendasPresencial").textContent = contarVendasPorLocal(vendasFiltradas, "Presencial");
+            atualizarGrafico(vendasFiltradas); // Atualiza o gráfico
+        }
+
+        // Função para renderizar a tabela de vendas
+        function renderizarTabela(vendasFiltradas = vendas) {
+            const tabelaVendas = document.getElementById("tabelaVendas");
+            tabelaVendas.innerHTML = ""; // Limpa a tabela antes de renderizar
+            vendasFiltradas.forEach((venda, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${venda.data}</td>
+                    <td>${venda.descricao}</td>
+                    <td>R$ ${venda.valor.toFixed(2)}</td>
+                    <td>${venda.local}</td>
+                    <td>
+                        <button class="btn" onclick="editarVenda(${index})">Editar</button>
+                        <button class="btn" onclick="excluirVenda(${index})">Excluir</button>
+                    </td>
+                `;
+                tabelaVendas.appendChild(row);
+            });
+        }
+
+        // Função para filtrar por data
+        function filtrarPorData() {
+            const dataInicial = document.getElementById("dataInicial").value;
+            const dataFinal = document.getElementById("dataFinal").value;
+            const vendasFiltradas = filtrarVendasPorData(dataInicial, dataFinal);
+            atualizarDashboard(vendasFiltradas);
+            renderizarTabela(vendasFiltradas);
+        }
+
+        // Função para limpar o filtro
+        function limparFiltro() {
+            document.getElementById("dataInicial").value = "";
+            document.getElementById("dataFinal").value = "";
+            atualizarDashboard(vendas);
+            renderizarTabela(vendas);
+        }
+
+        // Função para abrir o modal (adicionar/editar)
+        function abrirModal(index = null) {
+            const modal = document.getElementById("modal");
+            const overlay = document.getElementById("overlay");
+            if (index !== null) {
+                // Editar venda existente
+                vendaEditando = index;
+                document.getElementById("modalTitulo").textContent = "Editar Venda";
+                document.getElementById("dataVenda").value = vendas[index].data;
+                document.getElementById("descricaoProduto").value = vendas[index].descricao;
+                document.getElementById("valorVenda").value = vendas[index].valor;
+                document.getElementById("localVenda").value = vendas[index].local;
+            } else {
+                // Adicionar nova venda
+                vendaEditando = null;
+                document.getElementById("modalTitulo").textContent = "Adicionar Venda";
+                document.getElementById("dataVenda").value = "";
+                document.getElementById("descricaoProduto").value = "";
+                document.getElementById("valorVenda").value = "";
+                document.getElementById("localVenda").value = "WhatsApp";
+            }
+            modal.style.display = "block";
+            overlay.style.display = "block";
+        }
+
+        // Função para fechar o modal
+        function fecharModal() {
+            const modal = document.getElementById("modal");
+            const overlay = document.getElementById("overlay");
+            modal.style.display = "none";
+            overlay.style.display = "none";
+        }
+
+        // Função para salvar venda (adicionar ou editar)
+        function salvarVenda() {
             const data = document.getElementById("dataVenda").value;
             const descricao = document.getElementById("descricaoProduto").value;
             const valor = parseFloat(document.getElementById("valorVenda").value);
             const local = document.getElementById("localVenda").value;
 
-            console.log("Dados da venda:", { data, descricao, valor, local });
-
-            if (isNaN(valor)) {
-                alert("O valor deve ser um número válido.");
-                return;
-            }
-
-            const venda = { data, descricao, valor, local };
-
             if (vendaEditando !== null) {
                 // Editar venda existente
-                db.collection("vendas").doc(vendaEditando).update(venda)
-                    .then(() => {
-                        console.log("Venda atualizada com sucesso!");
-                        fecharModal();
-                        carregarVendas();
-                    })
-                    .catch((error) => {
-                        console.error("Erro ao atualizar venda:", error);
-                    });
+                vendas[vendaEditando] = { data, descricao, valor, local };
             } else {
                 // Adicionar nova venda
-                db.collection("vendas").add(venda)
-                    .then(() => {
-                        console.log("Venda salva com sucesso!");
-                        fecharModal();
-                        carregarVendas();
-                    })
-                    .catch((error) => {
-                        console.error("Erro ao salvar venda:", error);
-                    });
+                vendas.push({ data, descricao, valor, local });
             }
+
+            salvarDados(); // Salva os dados no LocalStorage
+            fecharModal();
+            atualizarDashboard();
+            renderizarTabela();
         }
 
-        // Função para carregar vendas do Firestore
-        function carregarVendas() {
-            const tabelaVendas = document.getElementById("tabelaVendas");
-            tabelaVendas.innerHTML = "";
-
-            db.collection("vendas").get()
-                .then((querySnapshot) => {
-                    querySnapshot.forEach((doc) => {
-                        const venda = doc.data();
-                        const row = document.createElement("tr");
-                        row.innerHTML = `
-                            <td>${venda.data}</td>
-                            <td>${venda.descricao}</td>
-                            <td>R$ ${venda.valor.toFixed(2)}</td>
-                            <td>${venda.local}</td>
-                            <td>
-                                <button class="btn" onclick="editarVenda('${doc.id}')">Editar</button>
-                                <button class="btn" onclick="excluirVenda('${doc.id}')">Excluir</button>
-                            </td>
-                        `;
-                        tabelaVendas.appendChild(row);
-                    });
-                })
-                .catch((error) => {
-                    console.error("Erro ao carregar vendas:", error);
-                });
+        // Função para editar venda
+        function editarVenda(index) {
+            abrirModal(index);
         }
 
-        // Função para salvar relatório no localStorage
-        function salvarRelatorioLocal() {
-            const vendas = [];
-            db.collection("vendas").get()
-                .then((querySnapshot) => {
-                    querySnapshot.forEach((doc) => {
-                        vendas.push(doc.data());
-                    });
-                    localStorage.setItem("relatorioVendas", JSON.stringify(vendas));
-                    alert("Relatório salvo no navegador!");
-                })
-                .catch((error) => {
-                    console.error("Erro ao salvar relatório:", error);
-                });
+        // Função para excluir venda
+        function excluirVenda(index) {
+            vendas.splice(index, 1);
+            salvarDados(); // Salva os dados no LocalStorage
+            atualizarDashboard();
+            renderizarTabela();
+        }
+
+        // Função para atualizar o gráfico
+        function atualizarGrafico(vendasFiltradas = vendas) {
+            const ctx = document.getElementById("graficoVendas").getContext("2d");
+            const vendasWhatsApp = contarVendasPorLocal(vendasFiltradas, "WhatsApp");
+            const vendasPresencial = contarVendasPorLocal(vendasFiltradas, "Presencial");
+
+            if (window.grafico) {
+                window.grafico.destroy(); // Destrói o gráfico anterior
+            }
+
+            window.grafico = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: ["WhatsApp", "Presencial"],
+                    datasets: [{
+                        label: "Vendas por Local",
+                        data: [vendasWhatsApp, vendasPresencial],
+                        backgroundColor: ["#32cd32", "#ffffff"], // Cores do gráfico
+                        borderColor: ["#32cd32", "#ffffff"],
+                        borderWidth: 1,
+                    }],
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                        },
+                    },
+                },
+            });
         }
 
         // Função para gerar PDF
@@ -200,77 +274,30 @@
             doc.setFontSize(18);
             doc.text("Relatório de Vendas", 10, 10);
 
-            // Conteúdo do PDF
+            // Adiciona a tabela de vendas ao PDF
+            doc.setFontSize(12);
             let y = 20;
-            db.collection("vendas").get()
-                .then((querySnapshot) => {
-                    querySnapshot.forEach((doc) => {
-                        const venda = doc.data();
-                        doc.setFontSize(12);
-                        doc.text(`Data: ${venda.data} | Descrição: ${venda.descricao} | Valor: R$ ${venda.valor.toFixed(2)} | Local: ${venda.local}`, 10, y);
-                        y += 10;
-                    });
-                    doc.save("relatorio_vendas.pdf");
-                })
-                .catch((error) => {
-                    console.error("Erro ao gerar PDF:", error);
-                });
+            vendas.forEach((venda, index) => {
+                doc.text(
+                    `Data: ${venda.data} | Descrição: ${venda.descricao} | Valor: R$ ${venda.valor.toFixed(2)} | Local: ${venda.local}`,
+                    10,
+                    y
+                );
+                y += 10;
+            });
+
+            // Adiciona o gráfico ao PDF
+            const graficoCanvas = document.getElementById("graficoVendas");
+            const graficoImagem = graficoCanvas.toDataURL("image/png");
+            doc.addImage(graficoImagem, "PNG", 10, y + 10, 180, 100);
+
+            // Salva o PDF
+            doc.save("relatorio_vendas.pdf");
         }
 
-        // Função para editar venda
-        function editarVenda(id) {
-            vendaEditando = id;
-            db.collection("vendas").doc(id).get()
-                .then((doc) => {
-                    if (doc.exists) {
-                        const venda = doc.data();
-                        document.getElementById("dataVenda").value = venda.data;
-                        document.getElementById("descricaoProduto").value = venda.descricao;
-                        document.getElementById("valorVenda").value = venda.valor;
-                        document.getElementById("localVenda").value = venda.local;
-                        abrirModal();
-                    }
-                })
-                .catch((error) => {
-                    console.error("Erro ao carregar venda:", error);
-                });
-        }
-
-        // Função para excluir venda
-        function excluirVenda(id) {
-            if (confirm("Tem certeza que deseja excluir esta venda?")) {
-                db.collection("vendas").doc(id).delete()
-                    .then(() => {
-                        console.log("Venda excluída com sucesso!");
-                        carregarVendas();
-                    })
-                    .catch((error) => {
-                        console.error("Erro ao excluir venda:", error);
-                    });
-            }
-        }
-
-        // Função para abrir o modal
-        function abrirModal() {
-            const modal = document.getElementById("modal");
-            const overlay = document.getElementById("overlay");
-            modal.style.display = "block";
-            overlay.style.display = "block";
-        }
-
-        // Função para fechar o modal
-        function fecharModal() {
-            const modal = document.getElementById("modal");
-            const overlay = document.getElementById("overlay");
-            modal.style.display = "none";
-            overlay.style.display = "none";
-            vendaEditando = null; // Limpa o ID da venda sendo editada
-        }
-
-        // Carregar vendas ao abrir a página
-        document.addEventListener("DOMContentLoaded", () => {
-            carregarVendas();
-        });
+        // Inicialização
+        atualizarDashboard();
+        renderizarTabela();
     </script>
 </body>
 </html>
